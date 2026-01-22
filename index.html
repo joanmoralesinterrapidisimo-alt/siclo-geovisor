@@ -1,134 +1,233 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <title>SiCLO · Sistema de Integración Comercial y Logístico</title>
+  <meta charset="utf-8" />
+  <title>SiCLO · Plataforma Geoespacial</title>
 
-    <!-- Responsive -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- OpenLayers core -->
-    <link rel="stylesheet" href="resources/ol.css" />
+  <!-- MapLibre -->
+  <link
+    href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css"
+    rel="stylesheet"
+  />
 
-    <!-- UI & Plugins -->
-    <link rel="stylesheet" href="resources/fontawesome-all.min.css" />
-    <link rel="stylesheet" href="resources/ol-layerswitcher.css" />
-    <link rel="stylesheet" href="resources/ol-search-layer.min.css" />
-    <link rel="stylesheet" href="resources/horsey.min.css" />
-    <link rel="stylesheet" href="resources/photon-geocoder-autocomplete.min.css" />
-    <link rel="stylesheet" href="resources/qgis2web.css" />
+  <!-- Tipografía moderna -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Global layout -->
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: "Inter", "Segoe UI", Roboto, sans-serif;
-            background: #0b0f14;
-        }
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0b0f14;
+      color: #e5e7eb;
+    }
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
 
-        /* OpenLayers controls */
-        .ol-control {
-            background: rgba(20, 24, 33, 0.85) !important;
-            border-radius: 10px !important;
-            padding: 4px !important;
-        }
+    /* Panel lateral */
+    .panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+    }
 
-        .ol-control button {
-            background: transparent !important;
-            color: #ffffff !important;
-            border-radius: 8px !important;
-        }
+    .panel h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 6px 0;
+    }
 
-        .ol-control button:hover {
-            background: rgba(0, 180, 255, 0.15) !important;
-        }
+    .panel p {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 0 0 14px 0;
+    }
 
-        /* Popup */
-        .ol-popup {
-            position: absolute;
-            background: #111827;
-            color: #e5e7eb;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            bottom: 12px;
-            left: -50px;
-            min-width: 260px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
+    .layer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
 
-        .ol-popup-closer {
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            text-decoration: none;
-            color: #9ca3af;
-        }
+    .layer input {
+      accent-color: #38bdf8;
+    }
 
-        .ol-popup-closer:hover {
-            color: #ffffff;
-        }
-    </style>
+    /* Popup */
+    .maplibregl-popup-content {
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .maplibregl-popup-close-button {
+      color: #9ca3af;
+    }
+  </style>
 </head>
 
 <body>
 
 <div id="map"></div>
 
-<div id="popup" class="ol-popup">
-    <a href="#" id="popup-closer" class="ol-popup-closer">✕</a>
-    <div id="popup-content"></div>
+<div class="panel">
+  <h1>SiCLO</h1>
+  <p>Sistema de Integración Comercial y Logístico</p>
+
+  <div class="layer">
+    <span>Lotes</span>
+    <input type="checkbox" id="lotes" checked />
+  </div>
+
+  <div class="layer">
+    <span>Malla vial</span>
+    <input type="checkbox" id="malla" checked />
+  </div>
+
+  <div class="layer">
+    <span>Sectores</span>
+    <input type="checkbox" id="sectores" />
+  </div>
 </div>
 
-<!-- Core JS -->
-<script src="resources/ol.js"></script>
+<!-- MapLibre -->
+<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 
-<!-- qgis2web helpers -->
-<script src="resources/qgis2web_expressions.js"></script>
-<script src="resources/functions.js"></script>
-<script src="resources/Autolinker.min.js"></script>
+<!-- PMTiles -->
+<script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
 
-<!-- UI plugins -->
-<script src="resources/horsey.min.js"></script>
-<script src="resources/ol-search-layer.js"></script>
-<script src="resources/ol-layerswitcher.js"></script>
-<script src="resources/photon-geocoder-autocomplete.min.js"></script>
+<script>
+  // ===== MAP INIT =====
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        osm: {
+          type: 'raster',
+          tiles: [
+            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          ],
+          tileSize: 256
+        }
+      },
+      layers: [
+        {
+          id: 'osm',
+          type: 'raster',
+          source: 'osm'
+        }
+      ]
+    },
+    center: [-74.08175, 4.60971], // Bogotá
+    zoom: 11,
+    pitch: 0,
+    bearing: 0
+  });
 
-<!-- Layers -->
-<script src="layers/Nodos_propuestos_1.js"></script>
-<script src="layers/Nodos_Bogota_2.js"></script>
-<script src="layers/SectorCatastral_3.js"></script>
-<script src="layers/Areas_demanda_4.js"></script>
-<script src="layers/Malla_Vial_Integral_5.js"></script>
-<script src="layers/Lotes_6.js"></script>
-<script src="layers/Placa_Domiciliaria_7.js"></script>
-<script src="layers/Puntos_nodos_8.js"></script>
-<script src="layers/Puntos_propios_9.js"></script>
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-<!-- Styles -->
-<script src="styles/Nodos_propuestos_1_style.js"></script>
-<script src="styles/Nodos_Bogota_2_style.js"></script>
-<script src="styles/SectorCatastral_3_style.js"></script>
-<script src="styles/Areas_demanda_4_style.js"></script>
-<script src="styles/Malla_Vial_Integral_5_style.js"></script>
-<script src="styles/Lotes_6_style.js"></script>
-<script src="styles/Placa_Domiciliaria_7_style.js"></script>
-<script src="styles/Puntos_nodos_8_style.js"></script>
-<script src="styles/Puntos_propios_9_style.js"></script>
+  // ===== PMTILES PROTOCOL =====
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol('pmtiles', protocol.tile);
 
-<!-- Layer config -->
-<script src="layers/layers.js"></script>
+  map.on('load', () => {
 
-<!-- Init map -->
-<script src="resources/qgis2web.js"></script>
+    // === LOTES ===
+    map.addSource('lotes', {
+      type: 'vector',
+      url: 'pmtiles://tiles/lotes.pmtiles'
+    });
+
+    map.addLayer({
+      id: 'lotes-fill',
+      type: 'fill',
+      source: 'lotes',
+      'source-layer': 'lotes',
+      paint: {
+        'fill-color': '#38bdf8',
+        'fill-opacity': 0.15
+      }
+    });
+
+    map.addLayer({
+      id: 'lotes-line',
+      type: 'line',
+      source: 'lotes',
+      'source-layer': 'lotes',
+      paint: {
+        'line-color': '#38bdf8',
+        'line-width': 0.6
+      }
+    });
+
+    // === MALLA VIAL ===
+    map.addSource('malla', {
+      type: 'vector',
+      url: 'pmtiles://tiles/malla.pmtiles'
+    });
+
+    map.addLayer({
+      id: 'malla-line',
+      type: 'line',
+      source: 'malla',
+      'source-layer': 'malla',
+      paint: {
+        'line-color': '#fbbf24',
+        'line-width': 1.1
+      }
+    });
+
+    // === SECTORES ===
+    map.addSource('sectores', {
+      type: 'vector',
+      url: 'pmtiles://tiles/sectores.pmtiles'
+    });
+
+    map.addLayer({
+      id: 'sectores-fill',
+      type: 'fill',
+      source: 'sectores',
+      'source-layer': 'sectores',
+      paint: {
+        'fill-color': '#22c55e',
+        'fill-opacity': 0.08
+      }
+    });
+  });
+
+  // ===== UI TOGGLES =====
+  document.getElementById('lotes').onchange = e => {
+    map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
+    map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
+
+  document.getElementById('malla').onchange = e => {
+    map.setLayoutProperty('malla-line', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
+
+  document.getElementById('sectores').onchange = e => {
+    map.setLayoutProperty('sectores-fill', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
+</script>
 
 </body>
 </html>
