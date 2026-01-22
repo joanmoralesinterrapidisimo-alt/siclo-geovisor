@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>SiCLO · Sistema de Integración Comercial y Logístico</title>
+
+    <!-- Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- OpenLayers core -->
+    <link rel="stylesheet" href="resources/ol.css" />
+
+    <!-- UI & Plugins -->
+    <link rel="stylesheet" href="resources/fontawesome-all.min.css" />
+    <link rel="stylesheet" href="resources/ol-layerswitcher.css" />
+    <link rel="stylesheet" href="resources/ol-search-layer.min.css" />
+    <link rel="stylesheet" href="resources/horsey.min.css" />
+    <link rel="stylesheet" href="resources/photon-geocoder-autocomplete.min.css" />
+    <link rel="stylesheet" href="resources/qgis2web.css" />
+
+    <!-- Global layout -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+            background: #0b0f14;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* OpenLayers controls */
+        .ol-control {
+            background: rgba(20, 24, 33, 0.85) !important;
+            border-radius: 10px !important;
+            padding: 4px !important;
+        }
+
+        .ol-control button {
+            background: transparent !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+        }
+
+        .ol-control button:hover {
+            background: rgba(0, 180, 255, 0.15) !important;
+        }
+
+        /* Popup */
+        .ol-popup {
+            position: absolute;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            bottom: 12px;
+            left: -50px;
+            min-width: 260px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .ol-popup-closer {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            text-decoration: none;
+            color: #9ca3af;
+        }
+
+        .ol-popup-closer:hover {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer">✕</a>
+    <div id="popup-content"></div>
+</div>
+
+<!-- Core JS -->
+<script src="resources/ol.js"></script>
+
+<!-- qgis2web helpers -->
+<script src="resources/qgis2web_expressions.js"></script>
+<script src="resources/functions.js"></script>
+<script src="resources/Autolinker.min.js"></script>
+
+<!-- UI plugins -->
+<script src="resources/horsey.min.js"></script>
+<script src="resources/ol-search-layer.js"></script>
+<script src="resources/ol-layerswitcher.js"></script>
+<script src="resources/photon-geocoder-autocomplete.min.js"></script>
+
+<!-- Layers -->
+<script src="layers/Nodos_propuestos_1.js"></script>
+<script src="layers/Nodos_Bogota_2.js"></script>
+<script src="layers/SectorCatastral_3.js"></script>
+<script src="layers/Areas_demanda_4.js"></script>
+<script src="layers/Malla_Vial_Integral_5.js"></script>
+<script src="layers/Lotes_6.js"></script>
+<script src="layers/Placa_Domiciliaria_7.js"></script>
+<script src="layers/Puntos_nodos_8.js"></script>
+<script src="layers/Puntos_propios_9.js"></script>
+
+<!-- Styles -->
+<script src="styles/Nodos_propuestos_1_style.js"></script>
+<script src="styles/Nodos_Bogota_2_style.js"></script>
+<script src="styles/SectorCatastral_3_style.js"></script>
+<script src="styles/Areas_demanda_4_style.js"></script>
+<script src="styles/Malla_Vial_Integral_5_style.js"></script>
+<script src="styles/Lotes_6_style.js"></script>
+<script src="styles/Placa_Domiciliaria_7_style.js"></script>
+<script src="styles/Puntos_nodos_8_style.js"></script>
+<script src="styles/Puntos_propios_9_style.js"></script>
+
+<!-- Layer config -->
+<script src="layers/layers.js"></script>
+
+<!-- Init map -->
+<script src="resources/qgis2web.js"></script>
+
+</body>
+</html>
