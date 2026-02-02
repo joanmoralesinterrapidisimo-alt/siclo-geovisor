@@ -23,9 +23,13 @@
 
     #map {
       position: absolute;
-      inset: 0;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      
     }
 
+    /* Overlay de bienvenida */
     .welcome {
       position: fixed;
       inset: 0;
@@ -47,6 +51,56 @@
       text-align: center;
     }
 
+    .welcome-card h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      letter-spacing: 0.4px;
+    }
+
+    .welcome-card p {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .welcome-card input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-bottom: 12px;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .welcome-card button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .welcome-card button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(56,189,248,0.4);
+    }
+
+    .error {
+      font-size: 12px;
+      color: #f87171;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Panel lateral */
     .panel {
       position: absolute;
       top: 20px;
@@ -60,6 +114,18 @@
       z-index: 10;
     }
 
+    .panel h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 6px 0;
+    }
+
+    .panel p {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 0 0 14px 0;
+    }
+
     .layer {
       display: flex;
       justify-content: space-between;
@@ -68,24 +134,36 @@
       font-size: 13px;
     }
 
+    .layer input {
+      accent-color: #38bdf8;
+    }
+
     .maplibregl-popup-content {
       background: #020617;
       color: #e5e7eb;
       border-radius: 10px;
       padding: 12px 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
+      
   </style>
 </head>
 
 <body>
 
+<!-- Pantalla de bienvenida -->
 <div class="welcome" id="welcome">
   <div class="welcome-card">
     <h1>SiCLO</h1>
-    <p>Sistema de Integración Comercial y Logístico</p>
+    <p>
+      Sistema de Integración Comercial y Logístico.<br>
+      Plataforma de análisis espacial, activos estratégicos y evidencia 360°.
+    </p>
+
     <input type="password" id="password" placeholder="Contraseña de acceso" />
-    <button onclick="login()">Ingresar</button>
-    <div id="error" style="display:none;color:#f87171;font-size:12px;">Contraseña incorrecta</div>
+    <button onclick="login()">Ingresar al Geoportal</button>
+
+    <div class="error" id="error">Contraseña incorrecta</div>
   </div>
 </div>
 
@@ -103,8 +181,28 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 
+
+  <div class="layer">
+    <span>Lotes</span>
+    <input type="checkbox" id="lotes" checked />
+  </div>
+
+  <div class="layer">
+    <span>Malla vial</span>
+    <input type="checkbox" id="malla" checked />
+  </div>
+
+  <div class="layer">
+    <span>Sectores</span>
+    <input type="checkbox" id="sectores" />
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
+
+  
 <script>
   // ===== LOGIN =====
   const PASSWORD = "siclo2026";
@@ -178,3 +276,4 @@
 
 </body>
 </html>
+
