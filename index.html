@@ -185,6 +185,24 @@
     <span>Sectores</span>
     <input type="checkbox" id="sectores" />
   </div>
+
+  <hr style="border-color: rgba(255,255,255,0.08); margin: 12px 0;" />
+
+  <div class="layer">
+    <span>Mapa base</span>
+    <select id="basemap" style="
+      background:#020617;
+      color:#e5e7eb;
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px;
+      padding:4px 8px;
+      font-size:12px;
+    ">
+      <option value="nav">Navegación</option>
+      <option value="sat">Satelital</option>
+    </select>
+  </div>
+
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
@@ -296,3 +314,4 @@
 
 </body>
 </html>
+
