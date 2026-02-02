@@ -11,158 +11,48 @@
   <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Marzipano -->
+  <script src="vendor/marzipano.js"></script>
+
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #0b0f14;
-      color: #e5e7eb;
-    }
+    html, body { margin:0; padding:0; height:100%; font-family:'Inter', system-ui, sans-serif; background:#0b0f14; color:#e5e7eb; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
 
-    #map {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-      
-    }
+    .welcome { position:fixed; inset:0; background: radial-gradient(circle at top, #0f172a, #020617); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .welcome-card { width:420px; max-width:90%; background:rgba(15,23,42,.95); backdrop-filter:blur(14px); border-radius:18px; padding:32px; box-shadow:0 30px 60px rgba(0,0,0,.6); text-align:center; }
+    .welcome-card h1 { font-size:22px; margin-bottom:8px; }
+    .welcome-card p { font-size:13px; color:#9ca3af; margin-bottom:20px; }
+    .welcome-card input { width:100%; padding:12px 14px; border-radius:10px; border:none; background:#020617; color:#e5e7eb; margin-bottom:12px; }
+    .welcome-card button { width:100%; padding:12px; border-radius:10px; border:none; background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#020617; font-weight:600; cursor:pointer; }
+    .error { font-size:12px; color:#f87171; display:none; }
 
-    /* Overlay de bienvenida */
-    .welcome {
+    .panel { position:absolute; top:20px; left:20px; width:320px; background:rgba(15,23,42,.92); backdrop-filter:blur(12px); border-radius:14px; padding:18px; box-shadow:0 20px 40px rgba(0,0,0,.45); z-index:10; }
+    .layer { display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; }
+
+    #viewer360 {
       position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, #0f172a, #020617);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .welcome-card {
+      right: 20px;
+      bottom: 20px;
       width: 420px;
-      max-width: 90%;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(14px);
-      border-radius: 18px;
-      padding: 32px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-      text-align: center;
-    }
-
-    .welcome-card h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-      letter-spacing: 0.4px;
-    }
-
-    .welcome-card p {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .welcome-card input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      margin-bottom: 12px;
+      height: 260px;
       background: #020617;
-      color: #e5e7eb;
-      font-size: 14px;
-    }
-
-    .welcome-card button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-      color: #020617;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .welcome-card button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(56,189,248,0.4);
-    }
-
-    .error {
-      font-size: 12px;
-      color: #f87171;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* Panel lateral */
-    .panel {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 320px;
-      background: rgba(15, 23, 42, 0.92);
-      backdrop-filter: blur(12px);
       border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
-      z-index: 10;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      display: none;
+      z-index: 20;
     }
-
-    .panel h1 {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0 0 6px 0;
-    }
-
-    .panel p {
-      font-size: 12px;
-      color: #9ca3af;
-      margin: 0 0 14px 0;
-    }
-
-    .layer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 13px;
-    }
-
-    .layer input {
-      accent-color: #38bdf8;
-    }
-
-    .maplibregl-popup-content {
-      background: #020617;
-      color: #e5e7eb;
-      border-radius: 10px;
-      padding: 12px 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-      
   </style>
 </head>
 
 <body>
 
-<!-- Pantalla de bienvenida -->
 <div class="welcome" id="welcome">
   <div class="welcome-card">
     <h1>SiCLO</h1>
-    <p>
-      Sistema de Integración Comercial y Logístico.<br>
-      Plataforma de análisis espacial, activos estratégicos y evidencia 360°.
-    </p>
-
-    <input type="password" id="password" placeholder="Contraseña de acceso" />
-    <button onclick="login()">Ingresar al Geoportal</button>
-
+    <p>Sistema de Integración Comercial y Logístico<br>Plataforma de análisis espacial y evidencia 360°</p>
+    <input type="password" id="password" placeholder="Contraseña" />
+    <button onclick="login()">Ingresar</button>
     <div class="error" id="error">Contraseña incorrecta</div>
   </div>
 </div>
@@ -170,8 +60,6 @@
 <div id="map"></div>
 
 <div class="panel">
-  <h1>SiCLO</h1>
-
   <div class="layer">
     <span>Mapa base</span>
     <select id="basemap">
@@ -181,176 +69,6 @@
   </div>
 </div>
 
+<div id="viewer360"></div>
 
-
-  <div class="layer">
-    <span>Lotes</span>
-    <input type="checkbox" id="lotes" checked />
-  </div>
-
-  <div class="layer">
-    <span>Malla vial</span>
-    <input type="checkbox" id="malla" checked />
-  </div>
-
-  <div class="layer">
-    <span>Sectores</span>
-    <input type="checkbox" id="sectores" />
-  </div>
-
-  <div id="viewer360" style="
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 420px;
-    height: 260px;
-    background: #020617;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    display: none;
-    z-index: 20;
-  "></div>
-
-
-
-  
-</div>
-
-<script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
-
-  
-<script>
-  // ===== LOGIN =====
-  const PASSWORD = "siclo2026";
-
-  function login() {
-    const input = document.getElementById("password").value;
-    if (input === PASSWORD) {
-      document.getElementById("welcome").style.display = "none";
-    } else {
-      document.getElementById("error").style.display = "block";
-    }
-  }
-
-  // ===== MAPA =====
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: {
-      version: 8,
-      sources: {
-        nav: {
-          type: 'raster',
-          tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
-          tileSize: 256
-        },
-        sat: {
-          type: 'raster',
-          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize: 256
-        }
-      },
-      layers: [
-        { id: 'basemap-nav', type: 'raster', source: 'nav', layout: { visibility: 'visible' } },
-        { id: 'basemap-sat', type: 'raster', source: 'sat', layout: { visibility: 'none' } }
-      ]
-    },
-    center: [-74.08175, 4.60971],
-    zoom: 12
-  });
-
-  map.addControl(new maplibregl.NavigationControl(), 'top-right');
-
-  // ===== CAMBIO MAPA BASE =====
-  document.getElementById('basemap').onchange = (e) => {
-    const isSat = e.target.value === 'sat';
-    map.setLayoutProperty('basemap-nav', 'visibility', isSat ? 'none' : 'visible');
-    map.setLayoutProperty('basemap-sat', 'visibility', isSat ? 'visible' : 'none');
-  };
-
-  // ===== EJEMPLO DE CARGA GEOJSON (luego lo reemplazas por el tuyo) =====
-  map.on('load', async () => {
-    const geojson = await fetch('data/Fotos_Normandia.geojson').then(r => r.json());
-    const geojson = await fetch('data/Lotes_normandia.geojson').then(r => r.json());
-    const geojson = await fetch('data/PDom_Normandia.geojson').then(r => r.json());
-
-    map.addSource('StreetView', {
-      type: 'geojson',
-      data: geojson
-    });
-
-    map.addLayer({
-      id: 'recorrido-points',
-      type: 'circle',
-      source: 'recorrido',
-      paint: {
-        'circle-radius': 6,
-        'circle-color': '#38bdf8',
-        'circle-stroke-width': 1.5,
-        'circle-stroke-color': '#020617'
-      }
-    });
-  });
-
-  map.on('click', 'street360-points', (e) => {
-    const props = e.features[0].properties;
-    abrir360(props.url_360, props);
-  });
-
-  map.on('mouseenter', 'street360-points', () => {
-    map.getCanvas().style.cursor = 'pointer';
-  });
-});
-
-  
-</script>
-
-<script>
-let viewer;
-
-function abrir360(url, props) {
-  const cont = document.getElementById('viewer360');
-  cont.style.display = 'block';
-  cont.innerHTML = "";
-
-  viewer = new Marzipano.Viewer(cont);
-
-  const source = Marzipano.ImageUrlSource.fromString(url);
-  const geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
-  const view = new Marzipano.RectilinearView();
-
-  const scene = viewer.createScene({
-    source: source,
-    geometry: geometry,
-    view: view
-  });
-
-  scene.switchTo();
-
-  // Info overlay
-  cont.insertAdjacentHTML('beforeend', `
-    <div style="
-      position:absolute;
-      left:0; bottom:0;
-      width:100%;
-      padding:10px 12px;
-      font-size:12px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      color:#e5e7eb;
-    ">
-      <b>Predio:</b> ${props.predio || '—'} · 
-      <b>Dirección:</b> ${props.direccion || '—'}
-    </div>
-  `);
-}
-</script>
-
-  
-</body>
-</html>
-
-
-
-
-
+<script src="https://unpkg.c
