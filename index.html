@@ -292,10 +292,23 @@
       }
     });
   });
+
+  map.on('click', 'street360-points', (e) => {
+    const props = e.features[0].properties;
+    abrir360(props.url_360, props);
+  });
+
+  map.on('mouseenter', 'street360-points', () => {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+});
+
+  
 </script>
 
 </body>
 </html>
+
 
 
 
