@@ -306,8 +306,50 @@
   
 </script>
 
+<script>
+let viewer;
+
+function abrir360(url, props) {
+  const cont = document.getElementById('viewer360');
+  cont.style.display = 'block';
+  cont.innerHTML = "";
+
+  viewer = new Marzipano.Viewer(cont);
+
+  const source = Marzipano.ImageUrlSource.fromString(url);
+  const geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
+  const view = new Marzipano.RectilinearView();
+
+  const scene = viewer.createScene({
+    source: source,
+    geometry: geometry,
+    view: view
+  });
+
+  scene.switchTo();
+
+  // Info overlay
+  cont.insertAdjacentHTML('beforeend', `
+    <div style="
+      position:absolute;
+      left:0; bottom:0;
+      width:100%;
+      padding:10px 12px;
+      font-size:12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      color:#e5e7eb;
+    ">
+      <b>Predio:</b> ${props.predio || '—'} · 
+      <b>Dirección:</b> ${props.direccion || '—'}
+    </div>
+  `);
+}
+</script>
+
+  
 </body>
 </html>
+
 
 
 
