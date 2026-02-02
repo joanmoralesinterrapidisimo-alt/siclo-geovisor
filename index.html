@@ -224,26 +224,37 @@
   }
 
   // ===== MAP INIT =====
+
+  <script>
   const map = new maplibregl.Map({
     container: 'map',
     style: {
       version: 8,
       sources: {
-        osm: {
+        nav: {
           type: 'raster',
           tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256
+        },
+        sat: {
+          type: 'raster',
+          tiles: [
+            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+          ],
           tileSize: 256
         }
       },
       layers: [
-        { id: 'osm', type: 'raster', source: 'osm' }
+        { id: 'basemap-nav', type: 'raster', source: 'nav', layout: { visibility: 'visible' } },
+        { id: 'basemap-sat', type: 'raster', source: 'sat', layout: { visibility: 'none' } }
       ]
     },
     center: [-74.08175, 4.60971],
-    zoom: 11
+    zoom: 12
   });
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
 
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -314,4 +325,5 @@
 
 </body>
 </html>
+
 
