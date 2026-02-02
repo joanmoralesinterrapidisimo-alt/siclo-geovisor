@@ -2,17 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>SiCLO · Geoportal Interrapidisimo</title>
-
+  <title>SiCLO · Geoportal Interrapidísimo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- MapLibre -->
-  <link
-    href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css"
-    rel="stylesheet"
-  />
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
 
-  <!-- Tipografía moderna -->
+  <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
@@ -32,6 +28,77 @@
       width: 100%;
     }
 
+    /* Overlay de bienvenida */
+    .welcome {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .welcome-card {
+      width: 420px;
+      max-width: 90%;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .welcome-card h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      letter-spacing: 0.4px;
+    }
+
+    .welcome-card p {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .welcome-card input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-bottom: 12px;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .welcome-card button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .welcome-card button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(56,189,248,0.4);
+    }
+
+    .error {
+      font-size: 12px;
+      color: #f87171;
+      margin-top: 10px;
+      display: none;
+    }
+
     /* Panel lateral */
     .panel {
       position: absolute;
@@ -43,6 +110,7 @@
       border-radius: 14px;
       padding: 18px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+      z-index: 10;
     }
 
     .panel h1 {
@@ -69,7 +137,6 @@
       accent-color: #38bdf8;
     }
 
-    /* Popup */
     .maplibregl-popup-content {
       background: #020617;
       color: #e5e7eb;
@@ -77,14 +144,26 @@
       padding: 12px 14px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-
-    .maplibregl-popup-close-button {
-      color: #9ca3af;
-    }
   </style>
 </head>
 
 <body>
+
+<!-- Pantalla de bienvenida -->
+<div class="welcome" id="welcome">
+  <div class="welcome-card">
+    <h1>SiCLO</h1>
+    <p>
+      Sistema de Integración Comercial y Logístico.<br>
+      Plataforma de análisis espacial, activos estratégicos y evidencia 360°.
+    </p>
+
+    <input type="password" id="password" placeholder="Contraseña de acceso" />
+    <button onclick="login()">Ingresar al Geoportal</button>
+
+    <div class="error" id="error">Contraseña incorrecta</div>
+  </div>
+</div>
 
 <div id="map"></div>
 
@@ -108,13 +187,24 @@
   </div>
 </div>
 
-<!-- MapLibre -->
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
-
-<!-- PMTiles -->
 <script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
 
 <script>
+  // ===== LOGIN SIMPLE =====
+  const PASSWORD = "siclo2026"; // 🔐 cambia esto
+
+  function login() {
+    const input = document.getElementById("password").value;
+    const error = document.getElementById("error");
+
+    if (input === PASSWORD) {
+      document.getElementById("welcome").style.display = "none";
+    } else {
+      error.style.display = "block";
+    }
+  }
+
   // ===== MAP INIT =====
   const map = new maplibregl.Map({
     container: 'map',
@@ -123,35 +213,25 @@
       sources: {
         osm: {
           type: 'raster',
-          tiles: [
-            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          ],
+          tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
           tileSize: 256
         }
       },
       layers: [
-        {
-          id: 'osm',
-          type: 'raster',
-          source: 'osm'
-        }
+        { id: 'osm', type: 'raster', source: 'osm' }
       ]
     },
-    center: [-74.08175, 4.60971], // Bogotá
-    zoom: 11,
-    pitch: 0,
-    bearing: 0
+    center: [-74.08175, 4.60971],
+    zoom: 11
   });
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-  // ===== PMTILES PROTOCOL =====
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol('pmtiles', protocol.tile);
 
   map.on('load', () => {
 
-    // === LOTES ===
     map.addSource('lotes', {
       type: 'vector',
       url: 'pmtiles://tiles/lotes.pmtiles'
@@ -162,10 +242,7 @@
       type: 'fill',
       source: 'lotes',
       'source-layer': 'lotes',
-      paint: {
-        'fill-color': '#38bdf8',
-        'fill-opacity': 0.15
-      }
+      paint: { 'fill-color': '#38bdf8', 'fill-opacity': 0.15 }
     });
 
     map.addLayer({
@@ -173,13 +250,9 @@
       type: 'line',
       source: 'lotes',
       'source-layer': 'lotes',
-      paint: {
-        'line-color': '#38bdf8',
-        'line-width': 0.6
-      }
+      paint: { 'line-color': '#38bdf8', 'line-width': 0.6 }
     });
 
-    // === MALLA VIAL ===
     map.addSource('malla', {
       type: 'vector',
       url: 'pmtiles://tiles/malla.pmtiles'
@@ -190,13 +263,9 @@
       type: 'line',
       source: 'malla',
       'source-layer': 'malla',
-      paint: {
-        'line-color': '#fbbf24',
-        'line-width': 1.1
-      }
+      paint: { 'line-color': '#fbbf24', 'line-width': 1.1 }
     });
 
-    // === SECTORES ===
     map.addSource('sectores', {
       type: 'vector',
       url: 'pmtiles://tiles/sectores.pmtiles'
@@ -207,14 +276,10 @@
       type: 'fill',
       source: 'sectores',
       'source-layer': 'sectores',
-      paint: {
-        'fill-color': '#22c55e',
-        'fill-opacity': 0.08
-      }
+      paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.08 }
     });
   });
 
-  // ===== UI TOGGLES =====
   document.getElementById('lotes').onchange = e => {
     map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
     map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
@@ -231,4 +296,3 @@
 
 </body>
 </html>
-
