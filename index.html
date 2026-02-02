@@ -23,12 +23,9 @@
 
     #map {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
+      inset: 0;
     }
 
-    /* Overlay de bienvenida */
     .welcome {
       position: fixed;
       inset: 0;
@@ -50,56 +47,6 @@
       text-align: center;
     }
 
-    .welcome-card h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-      letter-spacing: 0.4px;
-    }
-
-    .welcome-card p {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .welcome-card input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      margin-bottom: 12px;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 14px;
-    }
-
-    .welcome-card button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-      color: #020617;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .welcome-card button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(56,189,248,0.4);
-    }
-
-    .error {
-      font-size: 12px;
-      color: #f87171;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* Panel lateral */
     .panel {
       position: absolute;
       top: 20px;
@@ -113,18 +60,6 @@
       z-index: 10;
     }
 
-    .panel h1 {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0 0 6px 0;
-    }
-
-    .panel p {
-      font-size: 12px;
-      color: #9ca3af;
-      margin: 0 0 14px 0;
-    }
-
     .layer {
       display: flex;
       justify-content: space-between;
@@ -133,35 +68,24 @@
       font-size: 13px;
     }
 
-    .layer input {
-      accent-color: #38bdf8;
-    }
-
     .maplibregl-popup-content {
       background: #020617;
       color: #e5e7eb;
       border-radius: 10px;
       padding: 12px 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
   </style>
 </head>
 
 <body>
 
-<!-- Pantalla de bienvenida -->
 <div class="welcome" id="welcome">
   <div class="welcome-card">
     <h1>SiCLO</h1>
-    <p>
-      Sistema de Integración Comercial y Logístico.<br>
-      Plataforma de análisis espacial, activos estratégicos y evidencia 360°.
-    </p>
-
+    <p>Sistema de Integración Comercial y Logístico</p>
     <input type="password" id="password" placeholder="Contraseña de acceso" />
-    <button onclick="login()">Ingresar al Geoportal</button>
-
-    <div class="error" id="error">Contraseña incorrecta</div>
+    <button onclick="login()">Ingresar</button>
+    <div id="error" style="display:none;color:#f87171;font-size:12px;">Contraseña incorrecta</div>
   </div>
 </div>
 
@@ -169,64 +93,32 @@
 
 <div class="panel">
   <h1>SiCLO</h1>
-  <p>Sistema de Integración Comercial y Logístico</p>
-
-  <div class="layer">
-    <span>Lotes</span>
-    <input type="checkbox" id="lotes" checked />
-  </div>
-
-  <div class="layer">
-    <span>Malla vial</span>
-    <input type="checkbox" id="malla" checked />
-  </div>
-
-  <div class="layer">
-    <span>Sectores</span>
-    <input type="checkbox" id="sectores" />
-  </div>
-
-  <hr style="border-color: rgba(255,255,255,0.08); margin: 12px 0;" />
 
   <div class="layer">
     <span>Mapa base</span>
-    <select id="basemap" style="
-      background:#020617;
-      color:#e5e7eb;
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:8px;
-      padding:4px 8px;
-      font-size:12px;
-    ">
+    <select id="basemap">
       <option value="nav">Navegación</option>
       <option value="sat">Satelital</option>
     </select>
   </div>
-
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
 
 <script>
-  // ===== LOGIN SIMPLE =====
-  const PASSWORD = "siclo2026"; // 🔐 cambia esto
+  // ===== LOGIN =====
+  const PASSWORD = "siclo2026";
 
   function login() {
     const input = document.getElementById("password").value;
-    const error = document.getElementById("error");
-
     if (input === PASSWORD) {
       document.getElementById("welcome").style.display = "none";
     } else {
-      error.style.display = "block";
+      document.getElementById("error").style.display = "block";
     }
   }
 
-  // ===== MAP INIT =====
-
-  <script>
-    
+  // ===== MAPA =====
   const map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -239,9 +131,7 @@
         },
         sat: {
           type: 'raster',
-          tiles: [
-            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-          ],
+          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
           tileSize: 256
         }
       },
@@ -256,77 +146,35 @@
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
+  // ===== CAMBIO MAPA BASE =====
+  document.getElementById('basemap').onchange = (e) => {
+    const isSat = e.target.value === 'sat';
+    map.setLayoutProperty('basemap-nav', 'visibility', isSat ? 'none' : 'visible');
+    map.setLayoutProperty('basemap-sat', 'visibility', isSat ? 'visible' : 'none');
+  };
 
-  const protocol = new pmtiles.Protocol();
-  maplibregl.addProtocol('pmtiles', protocol.tile);
+  // ===== EJEMPLO DE CARGA GEOJSON (luego lo reemplazas por el tuyo) =====
+  map.on('load', async () => {
+    const geojson = await fetch('data/recorrido_360.geojson').then(r => r.json());
 
-  map.on('load', () => {
-
-    map.addSource('lotes', {
-      type: 'vector',
-      url: 'pmtiles://tiles/lotes.pmtiles'
+    map.addSource('recorrido', {
+      type: 'geojson',
+      data: geojson
     });
 
     map.addLayer({
-      id: 'lotes-fill',
-      type: 'fill',
-      source: 'lotes',
-      'source-layer': 'lotes',
-      paint: { 'fill-color': '#38bdf8', 'fill-opacity': 0.15 }
-    });
-
-    map.addLayer({
-      id: 'lotes-line',
-      type: 'line',
-      source: 'lotes',
-      'source-layer': 'lotes',
-      paint: { 'line-color': '#38bdf8', 'line-width': 0.6 }
-    });
-
-    map.addSource('malla', {
-      type: 'vector',
-      url: 'pmtiles://tiles/malla.pmtiles'
-    });
-
-    map.addLayer({
-      id: 'malla-line',
-      type: 'line',
-      source: 'malla',
-      'source-layer': 'malla',
-      paint: { 'line-color': '#fbbf24', 'line-width': 1.1 }
-    });
-
-    map.addSource('sectores', {
-      type: 'vector',
-      url: 'pmtiles://tiles/sectores.pmtiles'
-    });
-
-    map.addLayer({
-      id: 'sectores-fill',
-      type: 'fill',
-      source: 'sectores',
-      'source-layer': 'sectores',
-      paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.08 }
+      id: 'recorrido-points',
+      type: 'circle',
+      source: 'recorrido',
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#38bdf8',
+        'circle-stroke-width': 1.5,
+        'circle-stroke-color': '#020617'
+      }
     });
   });
-
-  document.getElementById('lotes').onchange = e => {
-    map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-    map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
-
-  document.getElementById('malla').onchange = e => {
-    map.setLayoutProperty('malla-line', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
-
-  document.getElementById('sectores').onchange = e => {
-    map.setLayoutProperty('sectores-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
 </script>
 
 </body>
 </html>
-
-
-
-
