@@ -226,6 +226,7 @@
   // ===== MAP INIT =====
 
   <script>
+    
   const map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -253,7 +254,7 @@
     zoom: 12
   });
 
- map.addControl(new maplibregl.NavigationControl(), 'top-right');
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
 
   const protocol = new pmtiles.Protocol();
@@ -325,6 +326,7 @@
 
 </body>
 </html>
+
 
 
 
