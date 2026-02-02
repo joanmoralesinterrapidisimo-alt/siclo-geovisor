@@ -7,6 +7,7 @@
 
   <!-- MapLibre -->
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 
   <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -16,18 +17,42 @@
 
   <style>
     html, body { margin:0; padding:0; height:100%; font-family:'Inter', system-ui, sans-serif; background:#0b0f14; color:#e5e7eb; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
+    #map { position:absolute; inset:0; }
 
-    .welcome { position:fixed; inset:0; background: radial-gradient(circle at top, #0f172a, #020617); display:flex; align-items:center; justify-content:center; z-index:9999; }
-    .welcome-card { width:420px; max-width:90%; background:rgba(15,23,42,.95); backdrop-filter:blur(14px); border-radius:18px; padding:32px; box-shadow:0 30px 60px rgba(0,0,0,.6); text-align:center; }
-    .welcome-card h1 { font-size:22px; margin-bottom:8px; }
-    .welcome-card p { font-size:13px; color:#9ca3af; margin-bottom:20px; }
-    .welcome-card input { width:100%; padding:12px 14px; border-radius:10px; border:none; background:#020617; color:#e5e7eb; margin-bottom:12px; }
-    .welcome-card button { width:100%; padding:12px; border-radius:10px; border:none; background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#020617; font-weight:600; cursor:pointer; }
-    .error { font-size:12px; color:#f87171; display:none; }
+    .panel {
+      position:absolute;
+      top:20px;
+      left:20px;
+      width:300px;
+      background:rgba(15,23,42,.92);
+      backdrop-filter:blur(12px);
+      border-radius:14px;
+      padding:16px 18px;
+      box-shadow:0 20px 40px rgba(0,0,0,.45);
+      z-index:10;
+    }
 
-    .panel { position:absolute; top:20px; left:20px; width:320px; background:rgba(15,23,42,.92); backdrop-filter:blur(12px); border-radius:14px; padding:18px; box-shadow:0 20px 40px rgba(0,0,0,.45); z-index:10; }
-    .layer { display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; }
+    .panel h1 {
+      font-size:16px;
+      margin:0 0 12px 0;
+      font-weight:600;
+    }
+
+    .layer {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      font-size:13px;
+    }
+
+    select, input[type="checkbox"] {
+      background:#020617;
+      color:#e5e7eb;
+      border:none;
+      border-radius:8px;
+      padding:4px 8px;
+    }
 
     #viewer360 {
       position: fixed;
@@ -47,30 +72,10 @@
 
 <body>
 
-<div class="welcome" id="welcome">
-  <div class="welcome-card">
-    <h1>SiCLO</h1>
-    <p>Sistema de Integración Comercial y Logístico<br>Plataforma de análisis espacial y evidencia 360°</p>
-    <input type="password" id="password" placeholder="Contraseña" />
-    <button onclick="login()">Ingresar</button>
-    <div class="error" id="error">Contraseña incorrecta</div>
-  </div>
-</div>
-
 <div id="map"></div>
 
 <div class="panel">
-  <div class="layer">
-    <span>Mapa base</span>
-    <select id="basemap">
-      <option value="nav">Navegación</option>
-      <option value="sat">Satelital</option>
-    </select>
-  </div>
-</div>
-
-<div class="panel">
-  <h1>SiCLO</h1>
+  <h1>SiCLO · Capas</h1>
 
   <div class="layer">
     <span>Mapa base</span>
@@ -80,7 +85,7 @@
     </select>
   </div>
 
-  <hr style="border-color: rgba(255,255,255,0.08); margin: 12px 0;" />
+  <hr style="border-color: rgba(255,255,255,0.08); margin: 10px 0;" />
 
   <div class="layer">
     <span>Recorrido 360</span>
@@ -93,91 +98,94 @@
   </div>
 
   <div class="layer">
-    <span>Malla vial</span>
-    <input type="checkbox" id="malla" checked />
-  </div>
-
-  <div class="layer">
     <span>Sectores</span>
-    <input type="checkbox" id="sectores" />
+    <input type="checkbox" id="sectores" checked />
   </div>
 </div>
 
-  
 <div id="viewer360"></div>
 
-<script src="https://unpkg.c
-
-  <script>
-map.on('load', async () => {
-
-  const fotos360 = await fetch('data/Fotos_Normandia.geojson').then(r => r.json());
-  const lotes = await fetch('data/Lotes_normandia.geojson').then(r => r.json());
-  const sectores = await fetch('data/PDom_Normandia.geojson').then(r => r.json());
-
-  // === RECORRIDO 360 ===
-  map.addSource('recorrido360', { type: 'geojson', data: fotos360 });
-
-  map.addLayer({
-    id: 'recorrido360-points',
-    type: 'circle',
-    source: 'recorrido360',
-    paint: {
-      'circle-radius': 6,
-      'circle-color': '#38bdf8',
-      'circle-stroke-width': 1.5,
-      'circle-stroke-color': '#020617'
-    }
+<script>
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [-74.09, 4.65],
+    zoom: 16
   });
 
-  // === LOTES ===
-  map.addSource('lotes', { type: 'geojson', data: lotes });
-  map.addLayer({
-    id: 'lotes-fill',
-    type: 'fill',
-    source: 'lotes',
-    paint: { 'fill-color': '#38bdf8', 'fill-opacity': 0.08 }
+  const basemaps = {
+    nav: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    sat: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+  };
+
+  document.getElementById('basemap').onchange = e => {
+    map.setStyle(basemaps[e.target.value]);
+  };
+
+  map.on('load', async () => {
+    const fotos360 = await fetch('data/Fotos_Normandia.geojson').then(r => r.json());
+    const lotes = await fetch('data/Lotes_normandia.geojson').then(r => r.json());
+    const sectores = await fetch('data/PDom_Normandia.geojson').then(r => r.json());
+
+    map.addSource('recorrido360', { type: 'geojson', data: fotos360 });
+    map.addLayer({
+      id: 'recorrido360-points',
+      type: 'circle',
+      source: 'recorrido360',
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#38bdf8',
+        'circle-stroke-width': 1.5,
+        'circle-stroke-color': '#020617'
+      }
+    });
+
+    map.addSource('lotes', { type: 'geojson', data: lotes });
+    map.addLayer({
+      id: 'lotes-fill',
+      type: 'fill',
+      source: 'lotes',
+      paint: { 'fill-color': '#38bdf8', 'fill-opacity': 0.08 }
+    });
+    map.addLayer({
+      id: 'lotes-line',
+      type: 'line',
+      source: 'lotes',
+      paint: { 'line-color': '#38bdf8', 'line-width': 0.6 }
+    });
+
+    map.addSource('sectores', { type: 'geojson', data: sectores });
+    map.addLayer({
+      id: 'sectores-fill',
+      type: 'fill',
+      source: 'sectores',
+      paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.08 }
+    });
   });
-  map.addLayer({
-    id: 'lotes-line',
-    type: 'line',
-    source: 'lotes',
-    paint: { 'line-color': '#38bdf8', 'line-width': 0.6 }
-  });
 
-  // === SECTORES ===
-  map.addSource('sectores', { type: 'geojson', data: sectores });
-  map.addLayer({
-    id: 'sectores-fill',
-    type: 'fill',
-    source: 'sectores',
-    paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.08 }
-  });
-});
-</script>
+  document.getElementById('recorrido360').onchange = e => {
+    map.setLayoutProperty('recorrido360-points', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
 
-  <script>
-document.getElementById('recorrido360').onchange = e => {
-  map.setLayoutProperty('recorrido360-points', 'visibility', e.target.checked ? 'visible' : 'none');
-};
+  document.getElementById('lotes').onchange = e => {
+    map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
+    map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
 
-document.getElementById('lotes').onchange = e => {
-  map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-  map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
-};
-
-document.getElementById('sectores').onchange = e => {
-  map.setLayoutProperty('sectores-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-};
-</script>
+  document.getElementById('sectores').onchange = e => {
+    map.setLayoutProperty('sectores-fill', 'visibility', e.target.checked ? 'visible' : 'none');
+  };
 
   map.on('click', 'recorrido360-points', (e) => {
-  const props = e.features[0].properties;
-  abrir360(props.url_360, props);
-});
+    const props = e.features[0].properties;
+    abrir360(props.url_360);
+  });
 
-map.on('mouseenter', 'recorrido360-points', () => {
-  map.getCanvas().style.cursor = 'pointer';
-});
+  function abrir360(url) {
+    document.getElementById('viewer360').style.display = 'block';
+    document.getElementById('viewer360').innerHTML = '<iframe src="'+url+'" style="width:100%;height:100%;border:none;"></iframe>';
+  }
+</script>
 
-
+</body>
+</html>
