@@ -1,191 +1,332 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>SiCLO · Geoportal Interrapidísimo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICLO - Futuristic Dark Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-  <!-- MapLibre -->
-  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
-  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-  <!-- Tipografía -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
 
-  <!-- Marzipano -->
-  <script src="vendor/marzipano.js"></script>
+        .overlay-text {
+            position: relative;
+            z-index: 10;
+            color: white;
+            font-size: 5rem;
+            font-weight: 200;
+            letter-spacing: 1.5rem;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInOut 8s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.6), 0 0 40px rgba(0, 191, 255, 0.3);
+            pointer-events: none;
+        }
 
-  <style>
-    html, body { margin:0; padding:0; height:100%; font-family:'Inter', system-ui, sans-serif; background:#0b0f14; color:#e5e7eb; }
-    #map { position:absolute; inset:0; }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: scale(0.98); letter-spacing: 2rem; }
+            40%, 60% { opacity: 0.9; transform: scale(1); letter-spacing: 1.5rem; }
+        }
 
-    .panel {
-      position:absolute;
-      top:20px;
-      left:20px;
-      width:300px;
-      background:rgba(15,23,42,.92);
-      backdrop-filter:blur(12px);
-      border-radius:14px;
-      padding:16px 18px;
-      box-shadow:0 20px 40px rgba(0,0,0,.45);
-      z-index:10;
-    }
+        .scanline {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(18, 16, 16, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.3;
+        }
 
-    .panel h1 {
-      font-size:16px;
-      margin:0 0 12px 0;
-      font-weight:600;
-    }
+        /* UI Elements */
+        .ui-panel {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 90%;
+            max-width: 600px;
+        }
 
-    .layer {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-      font-size:13px;
-    }
+        .gemini-btn {
+            background: rgba(138, 43, 226, 0.15);
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            color: #d8b4fe;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
 
-    select, input[type="checkbox"] {
-      background:#020617;
-      color:#e5e7eb;
-      border:none;
-      border-radius:8px;
-      padding:4px 8px;
-    }
+        .gemini-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            border-color: rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+            transform: translateY(-2px);
+        }
 
-    #viewer360 {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      width: 420px;
-      height: 260px;
-      background: #020617;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-      display: none;
-      z-index: 20;
-    }
-  </style>
+        .oracle-display {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.6;
+            min-height: 3em;
+            max-width: 500px;
+            font-weight: 300;
+            font-style: italic;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="map"></div>
+    <div id="canvas-container">
+        <div class="scanline"></div>
+        <canvas id="mainCanvas"></canvas>
+        <div class="overlay-text" id="mainTitle">SICLO</div>
 
-<div class="panel">
-  <h1>SiCLO · Capas</h1>
+        <div class="ui-panel">
+            <div id="oracleText" class="oracle-display">Initialize the city grid connection...</div>
+            <button id="geminiBtn" class="gemini-btn">✨ Consult the City Oracle</button>
+        </div>
+    </div>
 
-  <div class="layer">
-    <span>Mapa base</span>
-    <select id="basemap">
-      <option value="nav">Navegación</option>
-      <option value="sat">Satelital</option>
-    </select>
-  </div>
+    <script>
+        const apiKey = ""; // Environment handles this
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const oracleText = document.getElementById('oracleText');
+        const geminiBtn = document.getElementById('geminiBtn');
+        const mainTitle = document.getElementById('mainTitle');
+        
+        let width, height;
+        let mapLines = [];
 
-  <hr style="border-color: rgba(255,255,255,0.08); margin: 10px 0;" />
+        // --- GEMINI INTEGRATION ---
 
-  <div class="layer">
-    <span>Recorrido 360</span>
-    <input type="checkbox" id="recorrido360" checked />
-  </div>
+        async function geminiCall(prompt) {
+            let retries = 0;
+            const delays = [1000, 2000, 4000, 8000, 16000];
 
-  <div class="layer">
-    <span>Lotes</span>
-    <input type="checkbox" id="lotes" checked />
-  </div>
+            while (retries < 5) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: "You are the 'City Oracle' of Bogotá in a futuristic sci-fi setting. Provide short, poetic, and mysterious one-sentence insights about the city, its rain, its mountains (Monserrate), or its technological future. Keep it under 100 characters." }] }
+                        })
+                    });
 
-  <div class="layer">
-    <span>Sectores</span>
-    <input type="checkbox" id="sectores" checked />
-  </div>
-</div>
+                    if (!response.ok) throw new Error('API Error');
+                    const data = await response.ok ? await response.json() : null;
+                    return data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (e) {
+                    await new Promise(r => setTimeout(r, delays[retries]));
+                    retries++;
+                }
+            }
+            throw new Error('Connection Lost');
+        }
 
-<div id="viewer360"></div>
+        async function speakInsight(text) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Say in a calm, futuristic, ethereal whisper: ${text}` }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
+                    })
+                });
 
-<script>
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-    center: [-74.09, 4.65],
-    zoom: 16
-  });
+                const result = await response.json();
+                const pcmData = result.candidates[0].content.parts[0].inlineData.data;
+                const audioBlob = pcmToWav(pcmData, 24000); // Standard Gemini TTS sample rate
+                const audio = new Audio(URL.createObjectURL(audioBlob));
+                audio.play();
+            } catch (e) {
+                console.error("Audio error", e);
+            }
+        }
 
-  const basemaps = {
-    nav: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-    sat: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-  };
+        // Helper to convert PCM to WAV for browser playback
+        function pcmToWav(base64, sampleRate) {
+            const buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
+            const length = buffer.byteLength;
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+            
+            view.setUint32(0, 0x46464952, true); // "RIFF"
+            view.setUint32(4, 36 + length, true);
+            view.setUint32(8, 0x45564157, true); // "WAVE"
+            view.setUint32(12, 0x20746d66, true); // "fmt "
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, 1, true); // Mono
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            view.setUint32(36, 0x61746164, true); // "data"
+            view.setUint32(40, length, true);
 
-  document.getElementById('basemap').onchange = e => {
-    map.setStyle(basemaps[e.target.value]);
-  };
+            return new Blob([wavHeader, buffer], { type: 'audio/wav' });
+        }
 
-  map.on('load', async () => {
-    const fotos360 = await fetch('data/Fotos_Normandia.geojson').then(r => r.json());
-    const lotes = await fetch('data/Lotes_normandia.geojson').then(r => r.json());
-    const sectores = await fetch('data/PDom_Normandia.geojson').then(r => r.json());
+        geminiBtn.onclick = async () => {
+            geminiBtn.disabled = true;
+            oracleText.innerHTML = '<span class="loading-dots">Accessing Neural Grid</span>';
+            
+            try {
+                const insight = await geminiCall("Provide a new cryptic transmission from futuristic Bogotá.");
+                oracleText.innerText = insight;
+                speakInsight(insight);
+            } catch (e) {
+                oracleText.innerText = "System Failure. Reconnecting to the fog...";
+            } finally {
+                setTimeout(() => { geminiBtn.disabled = false; }, 2000);
+            }
+        };
 
-    map.addSource('recorrido360', { type: 'geojson', data: fotos360 });
-    map.addLayer({
-      id: 'recorrido360-points',
-      type: 'circle',
-      source: 'recorrido360',
-      paint: {
-        'circle-radius': 6,
-        'circle-color': '#38bdf8',
-        'circle-stroke-width': 1.5,
-        'circle-stroke-color': '#020617'
-      }
-    });
+        // --- ANIMATION LOGIC ---
 
-    map.addSource('lotes', { type: 'geojson', data: lotes });
-    map.addLayer({
-      id: 'lotes-fill',
-      type: 'fill',
-      source: 'lotes',
-      paint: { 'fill-color': '#38bdf8', 'fill-opacity': 0.08 }
-    });
-    map.addLayer({
-      id: 'lotes-line',
-      type: 'line',
-      source: 'lotes',
-      paint: { 'line-color': '#38bdf8', 'line-width': 0.6 }
-    });
+        function init() {
+            resize();
+            createMap();
+            animate();
+        }
 
-    map.addSource('sectores', { type: 'geojson', data: sectores });
-    map.addLayer({
-      id: 'sectores-fill',
-      type: 'fill',
-      source: 'sectores',
-      paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.08 }
-    });
-  });
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            createMap();
+        }
 
-  document.getElementById('recorrido360').onchange = e => {
-    map.setLayoutProperty('recorrido360-points', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
+        function createMap() {
+            mapLines = [];
+            const count = 50;
+            for (let i = 0; i < count; i++) {
+                let x = Math.random() * width;
+                let y = Math.random() * height;
+                let len = Math.random() * 300 + 50;
+                let isVert = Math.random() > 0.5;
+                mapLines.push({
+                    x, y, 
+                    x2: isVert ? x : x + len, 
+                    y2: isVert ? y + len : y,
+                    opacity: Math.random() * 0.1 + 0.05
+                });
+            }
+        }
 
-  document.getElementById('lotes').onchange = e => {
-    map.setLayoutProperty('lotes-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-    map.setLayoutProperty('lotes-line', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
+        function drawEclipse(time) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = 160;
 
-  document.getElementById('sectores').onchange = e => {
-    map.setLayoutProperty('sectores-fill', 'visibility', e.target.checked ? 'visible' : 'none');
-  };
+            const hue1 = (Math.sin(time * 0.0005) * 20 + 260);
+            const hue2 = (Math.cos(time * 0.0003) * 20 + 200);
 
-  map.on('click', 'recorrido360-points', (e) => {
-    const props = e.features[0].properties;
-    abrir360(props.url_360);
-  });
+            const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.8);
+            gradient.addColorStop(0, `hsla(${hue1}, 80%, 50%, 0)`);
+            gradient.addColorStop(0.4, `hsla(${hue1}, 70%, 50%, 0.4)`);
+            gradient.addColorStop(0.7, `hsla(${hue2}, 90%, 40%, 0.2)`);
+            gradient.addColorStop(1, `hsla(${hue2}, 100%, 20%, 0)`);
 
-  function abrir360(url) {
-    document.getElementById('viewer360').style.display = 'block';
-    document.getElementById('viewer360').innerHTML = '<iframe src="'+url+'" style="width:100%;height:100%;border:none;"></iframe>';
-  }
-</script>
+            ctx.beginPath();
+            ctx.fillStyle = gradient;
+            ctx.arc(centerX, centerY, radius * 2, 0, Math.PI * 2);
+            ctx.fill();
 
+            ctx.beginPath();
+            ctx.strokeStyle = `hsla(${hue1}, 100%, 70%, 0.1)`;
+            ctx.lineWidth = 1.5;
+            ctx.arc(centerX, centerY, radius + Math.sin(time * 0.002) * 5, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#050508';
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawMap(time) {
+            ctx.lineWidth = 0.5;
+            mapLines.forEach(line => {
+                const flicker = Math.sin(time * 0.002 + line.x) * 0.05;
+                ctx.strokeStyle = `rgba(140, 100, 255, ${line.opacity + flicker})`;
+                ctx.beginPath();
+                ctx.moveTo(line.x, line.y);
+                ctx.lineTo(line.x2, line.y2);
+                ctx.stroke();
+            });
+        }
+
+        function animate(time = 0) {
+            ctx.clearRect(0, 0, width, height);
+            
+            ctx.save();
+            ctx.translate(Math.sin(time * 0.0002) * 30, Math.cos(time * 0.0001) * 30);
+            drawMap(time);
+            ctx.restore();
+
+            drawEclipse(time);
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        init();
+    </script>
 </body>
 </html>
