@@ -241,97 +241,169 @@
             }
         };
 
-        // --- ANIMATION LOGIC ---
 
+        // --- ANIMATION LOGIC ---
+        
+        let particles = [];
+        
         function init() {
             resize();
             createMap();
+            createParticles();
             animate();
         }
-
+        
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
             createMap();
         }
-
+        
         function createMap() {
             mapLines = [];
-            const count = 50;
+            const count = 70;
             for (let i = 0; i < count; i++) {
                 let x = Math.random() * width;
                 let y = Math.random() * height;
-                let len = Math.random() * 300 + 50;
+                let len = Math.random() * 300 + 80;
                 let isVert = Math.random() > 0.5;
                 mapLines.push({
-                    x, y, 
-                    x2: isVert ? x : x + len, 
+                    x, y,
+                    x2: isVert ? x : x + len,
                     y2: isVert ? y + len : y,
-                    opacity: Math.random() * 0.1 + 0.05
+                    opacity: Math.random() * 0.08 + 0.04
                 });
             }
         }
-
+        
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    angle: Math.random() * Math.PI * 2,
+                    radius: 180 + Math.random() * 60,
+                    speed: 0.0003 + Math.random() * 0.0005,
+                    size: Math.random() * 2 + 0.5
+                });
+            }
+        }
+        
+        function drawParticles(time) {
+            const cx = width / 2;
+            const cy = height / 2;
+        
+            particles.forEach(p => {
+                const a = p.angle + time * p.speed;
+                const x = cx + Math.cos(a) * p.radius;
+                const y = cy + Math.sin(a) * p.radius;
+        
+                const glow = 0.3 + Math.sin(time * 0.002 + p.angle) * 0.2;
+        
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(120,160,255,${glow})`;
+                ctx.arc(x, y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
         function drawEclipse(time) {
             const centerX = width / 2;
             const centerY = height / 2;
             const radius = 160;
-
-            const hue1 = (Math.sin(time * 0.0005) * 20 + 260);
-            const hue2 = (Math.cos(time * 0.0003) * 20 + 200);
-
-            const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.8);
-            gradient.addColorStop(0, `hsla(${hue1}, 80%, 50%, 0)`);
-            gradient.addColorStop(0.4, `hsla(${hue1}, 70%, 50%, 0.4)`);
-            gradient.addColorStop(0.7, `hsla(${hue2}, 90%, 40%, 0.2)`);
-            gradient.addColorStop(1, `hsla(${hue2}, 100%, 20%, 0)`);
-
+        
+            // Paleta medianoche dinámica
+            const hueBase = 240 + Math.sin(time * 0.0004) * 20;
+            const hueAccent = 260 + Math.cos(time * 0.0003) * 25;
+        
+            // Halo exterior profundo
+            const gradient = ctx.createRadialGradient(
+                centerX, centerY, radius * 0.7,
+                centerX, centerY, radius * 2.2
+            );
+        
+            gradient.addColorStop(0, `hsla(${hueAccent}, 80%, 40%, 0)`);
+            gradient.addColorStop(0.35, `hsla(${hueAccent}, 70%, 45%, 0.35)`);
+            gradient.addColorStop(0.6, `hsla(${hueBase}, 90%, 35%, 0.18)`);
+            gradient.addColorStop(1, `hsla(${hueBase}, 100%, 20%, 0)`);
+        
             ctx.beginPath();
             ctx.fillStyle = gradient;
-            ctx.arc(centerX, centerY, radius * 2, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, radius * 2.2, 0, Math.PI * 2);
             ctx.fill();
-
+        
+            // Anillo principal respirando
             ctx.beginPath();
-            ctx.strokeStyle = `hsla(${hue1}, 100%, 70%, 0.1)`;
-            ctx.lineWidth = 1.5;
-            ctx.arc(centerX, centerY, radius + Math.sin(time * 0.002) * 5, 0, Math.PI * 2);
+            ctx.strokeStyle = `hsla(${hueAccent}, 100%, 70%, 0.18)`;
+            ctx.lineWidth = 1.6;
+            ctx.arc(
+                centerX,
+                centerY,
+                radius + Math.sin(time * 0.0025) * 6,
+                0,
+                Math.PI * 2
+            );
             ctx.stroke();
-
+        
+            // Segundo anillo energético
+            ctx.beginPath();
+            ctx.strokeStyle = `hsla(${hueBase}, 100%, 60%, 0.08)`;
+            ctx.lineWidth = 3;
+            ctx.arc(
+                centerX,
+                centerY,
+                radius + 25 + Math.cos(time * 0.0015) * 10,
+                0,
+                Math.PI * 2
+            );
+            ctx.stroke();
+        
+            // Núcleo oscuro
             ctx.beginPath();
             ctx.fillStyle = '#050508';
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fill();
         }
-
+        
         function drawMap(time) {
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.6;
             mapLines.forEach(line => {
-                const flicker = Math.sin(time * 0.002 + line.x) * 0.05;
-                ctx.strokeStyle = `rgba(140, 100, 255, ${line.opacity + flicker})`;
+                const flicker =
+                    Math.sin(time * 0.0015 + line.x * 0.01) * 0.05;
+        
+                ctx.strokeStyle =
+                    `rgba(110,140,255,${line.opacity + flicker})`;
+        
                 ctx.beginPath();
                 ctx.moveTo(line.x, line.y);
                 ctx.lineTo(line.x2, line.y2);
                 ctx.stroke();
             });
         }
-
+        
         function animate(time = 0) {
             ctx.clearRect(0, 0, width, height);
-            
+        
+            // respiración del fondo
             ctx.save();
-            ctx.translate(Math.sin(time * 0.0002) * 30, Math.cos(time * 0.0001) * 30);
+            ctx.translate(
+                Math.sin(time * 0.00015) * 25,
+                Math.cos(time * 0.00012) * 25
+            );
             drawMap(time);
             ctx.restore();
-
+        
+            drawParticles(time);
             drawEclipse(time);
+        
             requestAnimationFrame(animate);
         }
-
+        
         window.addEventListener('resize', resize);
         init();
     </script>
 </body>
 </html>
+
 
 
 
